@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task-Management</title>
+    <link href="./vendor/css/bootstrap.css" rel="stylesheet">
+    <link href="./vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="./vendor/fontawesome/css/all.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a href="#" class="navbar-brand">
+                <img src="" class="img-fluid" alt="logo" width="150">
+            </a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbar">
+                <div class="navbar-nav ms-auto">
+                    
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container p-5">
+        <div class="mb-4">
+            <button type="button" class="btn btn-outline-primary" onclick="showTaskModal()">Add Task</button>
+        </div>
+        <div class="d-flex justify-content-center">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead class="text-center">
+                                <th>#</th>
+                                <th>Task Description</th>
+                                <th>Responsible</th>
+                                <th>ETA</th>
+                                <th>Action</th>
+                            </thead>
+                            <tbody class="text-center" id="taskTableBody">
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addTaskModal" data-bs-backdrop="static" data-bs-keyboard="false" tabi="-1" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+        <form id="taskInputForm">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addTaskModalLabel">Add Task</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-1">
+                            <label for="addTaskTextArea" class="form-label">Task</label>
+                            <textarea class="form-control" id="addTaskTextArea" name="taskDescription" rows="3" placeholder="Add your Task"></textarea>
+                        </div>
+                        <div class="mb-1">
+                            <label for="addTaskResponsible" class="form-label">Responsible</label>
+                            <input type="text" class="form-control" id="addResponsiblePerson" name="taskResponsiblePerson" placeholder="Add The Responsible person's Name">
+                        </div>
+                        <div class="mb-1">
+                            <label for="addtaskResponsible" class="form-label">ETA</label>
+                            <input type="datetime-local" class="form-control" id="addETA" name="taskETA" placeholder="Click to Add time">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="addTask()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+    <div class="modal fade" id="updateTaskModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editTaskModalLabel">
+        <form id="taskUpdateForm">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="editTaskTextArea" class="form-label">Task</label>
+                            <textarea class="form-control" id="editTaskTextArea" name="taskDescription" rows="3" placeholder="Add your task here"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addResponsiblePerson" class="form-label">Responsible</label>
+                            <input type="text" class="form-control" id="editResponsiblePerson" name="taskResponsiblePerson" placeholder="Add the responsible person's name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addETA" class="form-label">ETA</label>
+                            <input type="datetime-local" class="form-control" id="editETA" name="taskETA" required>
+                        </div>
+                        <input type="hidden" id="editIndex" name="taskIndex">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" onclick="updateTask()">Update</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="./vendor/jquery/jquery.min.js" ></script>
+    <script src="./vendor/popper/popper.js"></script>
+    <script src="./vendor/js/bootstrap.js"></script>
+
+    <script>
+        createHtmlfromStorage();
+        function showTaskModal()
+        {
+            $("#addTaskModal").modal('show');
+        }
+
+        function addTask()
+        {
+            console.log('Clicked')
+            $("#addTaskModal").modal('hide');
+            //console.log($("#taskInputForm").serializeArray())
+            var dataArr = $("#taskInputForm").serializeArray();
+            var taskObject = new Object();
+            var storageObjectArr = [];
+            var storageObject = localStorage.getItem('taskStorage');
+            for(var i in dataArr)
+            {
+                var name = dataArr[i]['name'];
+                var value = dataArr[i]['value'];
+                taskObject[name]=value
+            }
+            if(storageObject!='' && storageObject!=null && storageObject!=undefined)
+            {
+                storageObjectArr = JSON.parse(storageObject)
+                storageObjectArr.push(taskObject)
+            }
+            else{
+                storageObjectArr.push(taskObject)
+            }
+            localStorage.setItem('taskStorage', JSON.stringify(storageObjectArr))
+            createHtmlfromStorage();
+        }
+
+        function createHtmlfromStorage()
+        {
+            var storageObjectArr = [];
+            var storageObject = localStorage.getItem('taskStorage')
+            var storageObjectArr = JSON.parse(storageObject)
+            var html=''
+            if(storageObject!='' && storageObject!=null && storageObject!=undefined)
+            {
+                if(storageObjectArr && storageObjectArr.length>0)
+                {
+                    for(let i in storageObjectArr)
+                    {
+                        var date = new Date(storageObjectArr[i]['taskETA'])
+                        html = html + '<tr>'
+                                    +    '<td>'+ (parseInt(i)+1) +'</td>'
+                                    +    '<td>'+storageObjectArr[i]['taskDescription']+'</td>'
+                                    +    '<td>'+storageObjectArr[i]['taskResponsiblePerson']+'</td>'
+                                    +    '<td>'+date.toUTCString()+'</td>'
+                                    +    '<td><i class="bi bi-check-circle-fill" onclick="markAsDone('+i+')"></i><i class="bi bi-pencil-square" onclick="editTask('+i+')"></i></td></tr>'
+                    }
+                }
+                else
+                {
+                    html = '<tr><td colspan="5">No Task Added</td><tr>';
+                }
+            }
+            $("#taskTableBody").html(html)
+        }
+
+        function markAsDone(i)
+        {
+            console.log(i)
+            var storageObjectArr = [];
+            var storageObject = localStorage.getItem('taskStorage')
+            if(storageObject!='' && storageObject!=null && storageObject!=undefined)
+            {
+                storageObjectArr = JSON.parse(storageObject)
+                storageObjectArr.splice(i,1)
+            }
+            localStorage.setItem('taskStorage', JSON.stringify(storageObjectArr));
+            createHtmlfromStorage();
+        }
+
+        function editTask(i) {
+            var storageObject = localStorage.getItem('taskStorage');
+            var storageObjectArr = [];
+            if (storageObject != '' && storageObject != undefined && storageObject != null) {
+                storageObjectArr = JSON.parse(storageObject);
+                
+                $("#editTaskTextArea").val(storageObjectArr[i]['taskDescription']);
+                $("#editResponsiblePerson").val(storageObjectArr[i]['taskResponsiblePerson']);
+                $("#editETA").val(storageObjectArr[i]['taskETA']);
+                $("#editIndex").val(i);
+        
+                // Show modal and remove inert
+                $("#updateTaskModal").removeAttr('inert').modal('show');
+            }
+        }
+        
+        // Hide the inert attribute when modal is hidden
+        $('#updateTaskModal').on('hidden.bs.modal', function () {
+            $(this).attr('inert', true);
+        });
+        
+        function updateTask() {
+            var dataArr = $("#taskUpdateForm").serializeArray();
+            var taskObject = new Object();
+            var storageObjectArr = [];
+            var storageObject = localStorage.getItem('taskStorage');
+            for(var i in dataArr)
+            {
+                var name = dataArr[i]['name'];
+                var value = dataArr[i]['value'];
+                taskObject[name]=value;
+            }
+            if(storageObject!=null && storageObject!=undefined && storageObject!=null)
+            {
+                storageObjectArr=JSON.parse(storageObject)
+                storageObjectArr[taskObject['taskIndex']] = taskObject;
+            }
+            localStorage.setItem('taskStorage', JSON.stringify(storageObjectArr))
+            createHtmlfromStorage();
+        }
+    </script>
+</body>
+</html>
