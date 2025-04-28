@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="author" content="Dennis">
+    <meta name="description" content="Expance Tracker Application">
+    <link href="./vendor/css/bootstrap.css" rel="stylesheet">
+    <link href="./vendor/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet"> 
+    <title>TO-Do LIST</title>
+ 
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a href="#" class="navbar-brand">
+                <image src="./vendor/Images/pay.png" class="img-fluid" alt="logo" width="35"></image>
+            </a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar">
+                <li class="bi bi-list"></li>
+            </button>
+            <div class="collapse navbar-collapse" id="navbar">
+                <div class="navbar-nav ms-auto" id="navbar">
+                    Home
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div class="float-end">
+            <button type="button" class="btn btn-outine-primary" onclick="showExpenseModal()">Add Expense</button>
+        </div>
+        <div class="float-start ">
+            <label class="text-success"><b>Total Spent</b></label>
+            <span id="totalSpent"></span>
+        </div>
+    </div>
+    <div class="container py-5 px-5">
+        
+        <div class="d-flex justify-content-center">
+            <div class="col-sm-12 col-md-12 col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead class="text-center">
+                                <th>#</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Spent Amount</th>
+                            </thead>
+                            <tbody class="text-center" id="expenseTableBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addExpenseModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addExpenseModal" aria-hidden="true">
+        <form id="addExpanseForm">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addExpanseModalLable">Add Expanse</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-1">
+                            <label for="addExpenseDescription" class="form-lable">Description</label>
+                            <textarea class="form-control" id="addExpenseDescription" name="description" rows="3" placeholder="Add Your Decription"></textarea>
+                        </div>
+                        <div class="mb-1">
+                            <label for="addExpenseExpenditureDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="addExpenseExpenditureDate" name="date" placeholder="Add Your Expenditure Date">
+                        </div>
+                        <div class="mb-1">
+                            <label for="addExpenseSpentAmount" class="form-label">Spent Amount</label>
+                            <input type="number" class="form-control" id="addExpenseSpentAmount" name="spent" placeholder="Add Your Spent Amount" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="saveExpanse()">save</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="./vendor/jquery/jquery.min.js" ></script>
+    <script src="./vendor/popper/popper.js"></script>
+    <script src="./vendor/js/bootstrap.js"></script>
+
+    <script>
+        getTotalExpenditure()
+        createTableFromJSON();
+        function showExpenseModal(){
+            $("#addExpenseModal").modal('show');
+        }
+
+        function saveExpanse()
+        {
+            $("#addExpenseModal").modal('hide');
+            var dataArr = $("#addExpanseForm").serializeArray();
+            console.log(dataArr);
+            var expenseObject = new Object();
+            var storageObjectArr = [];
+            var storageObject = localStorage.getItem("expenseStorage");
+            for(var i in dataArr)
+            {
+                var name = dataArr[i]['name'];
+                var value = dataArr[i]['value'];
+                expenseObject[name] = value;
+            }
+            if(storageObject != null && storageObject != undefined && storageObject != '')
+            {
+                storageObjectArr = JSON.parse(storageObject);
+                storageObjectArr.push(expenseObject);
+            }
+            else
+            {
+                storageObjectArr.push(expenseObject);
+            }
+            localStorage.setItem("expenseStorage", JSON.stringify(storageObjectArr));
+            createTableFromJSON();
+            getTotalExpenditure();
+            $("addExpenseModal").trigger('reset'); 
+        }
+
+        function createTableFromJSON()
+        {
+            var storageObjectArr = [];
+            var storageObject = localStorage.getItem('expenseStorage');
+            var storageObjectArr = JSON.parse(storageObject);
+            var html = "";
+            if(storageObject!=null && storageObject != undefined && storageObject!='')
+            {
+                if(storageObjectArr && storageObjectArr.length>0)
+                {
+                    for(let i in storageObjectArr)
+                    {
+                        var date = new Date(storageObjectArr[i]['date']);
+                        date = date.toISOString();
+                        date = date.split('T')[0];
+                        html = html + '<tr>'
+                                    + '<td>' + (parseInt(i)+1) + '</td>'
+                                    + '<td>' + storageObjectArr[i]['description'] + '</td>'
+                                    + '<td>' + date + '</td>'
+                                    + '<td>' + storageObjectArr[i]['spent'] + '</td>'
+                                    
+                    }
+                }
+                else
+                {
+                    html = '<tr><td colspan="4">No Expense Added Yet</td></tr>'
+                }
+            }
+            else
+            {
+                html = '<tr><td colspan="4">No Expense Added Yet</td></tr>'
+            }
+            $("#expenseTableBody").html(html)
+        }
+        function getTotalExpenditure()
+        {
+            var storageObjectArr = [];
+            var storageObject = localStorage.getItem('expenseStorage');
+            var storageObjectArr = JSON.parse(storageObject);
+            var spent = 0;
+            if(storageObject!=null && storageObject != undefined && storageObject!='')
+            {
+                if(storageObjectArr && storageObjectArr.length>0)
+                {
+                    for(let i in storageObjectArr)
+                    {
+                        spent = parseInt(spent) + parseInt(storageObjectArr[i]['spent'])
+                                    
+                    }
+                }
+                else
+                {
+                    spent = 0
+                }
+            }
+            else
+            {
+                spent = 0
+            }
+            $("#totalSpent").html(spent)
+        }
+    </script>
+</body>
+</html>
